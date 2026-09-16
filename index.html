@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ROTA — Tudo em um só lugar</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Arial,sans-serif;background:#020817;color:#fff}
+:root{--blue:#19a7ff;--cyan:#00e5ff;--gold:#ffc83d;--green:#20e890;--purple:#a855f7;--orange:#ff9d24;--panel:rgba(7,22,48,.88)}
+button,input,select{font:inherit}button{cursor:pointer;border:0}
+.app{min-height:100vh;background:radial-gradient(circle at 80% 0%,#0b3d69 0,#020817 38%,#01040c 100%)}
+.top{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #17375f;position:sticky;top:0;background:rgba(2,8,23,.92);backdrop-filter:blur(16px);z-index:5}
+.logo{font-weight:900;font-size:28px;letter-spacing:1px}.logo b{color:var(--gold)}.tag{font-size:11px;color:#a9c9e8}
+.screen{display:none;padding:22px;max-width:1250px;margin:auto}.screen.active{display:block}
+.card{background:var(--panel);border:1px solid #174579;border-radius:20px;padding:18px;box-shadow:0 10px 35px #0007}
+.hero{padding:28px;border-radius:26px;background:linear-gradient(135deg,#06224a,#082d5a 55%,#11133f);border:1px solid #1765a5}
+.hero h1{font-size:clamp(32px,7vw,64px);margin:0 0 8px}.hero p{color:#b9d6f3;max-width:650px}
+.btn{padding:13px 18px;border-radius:13px;color:#fff;font-weight:800;background:linear-gradient(135deg,#087cff,#00cfff);box-shadow:0 8px 22px #00aaff33}
+.btn.gold{background:linear-gradient(135deg,#ffb300,#ffd85c);color:#10100a}.btn.green{background:linear-gradient(135deg,#00b96b,#22e89b)}
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:18px}.role{padding:20px;border-radius:18px;border:1px solid #1d4e83;background:#061a36;transition:.2s}.role:hover{transform:translateY(-3px);border-color:var(--cyan)}.role .ico{font-size:34px}.role h3{margin:8px 0 4px}.muted{color:#9bb7d4;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.col3{grid-column:span 3}.col4{grid-column:span 4}.col6{grid-column:span 6}.col8{grid-column:span 8}.col12{grid-column:span 12}
+.kpi{min-height:130px}.kpi .n{font-size:28px;font-weight:900;margin-top:10px}.greenText{color:var(--green)}.blueText{color:var(--cyan)}.goldText{color:var(--gold)}.purpleText{color:#c084fc}
+.nav{display:flex;gap:8px;overflow:auto;padding:10px 0;margin-bottom:14px}.nav button{white-space:nowrap;background:#071a35;border:1px solid #194678;color:#c9ddf2;padding:10px 13px;border-radius:12px}.nav button.active{background:#0b63b6;color:#fff}
+.map{height:360px;border-radius:18px;position:relative;overflow:hidden;background:
+linear-gradient(120deg,transparent 47%,#00d9ff55 48%,transparent 49%),
+linear-gradient(25deg,transparent 40%,#2b72ff44 41%,transparent 42%),
+radial-gradient(circle at 25% 40%,#00d9ff33 0 2%,transparent 3%),
+radial-gradient(circle at 65% 65%,#ffb00044 0 2%,transparent 3%),#041329;
+border:1px solid #19548d}.map:before{content:"MAPA DE OPERAÇÕES";position:absolute;top:16px;left:16px;font-weight:800;color:#b8d9f7}.pin{position:absolute;font-size:24px;filter:drop-shadow(0 0 8px #00e5ff)}.line{position:absolute;height:4px;background:linear-gradient(90deg,#00e5ff,#8b5cf6,#ffc83d);transform-origin:left;border-radius:8px}
+.list{display:grid;gap:10px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px;border-radius:14px;background:#071a35;border:1px solid #143e6d}.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;background:#0e375f;color:#8ed8ff}.badge.g{background:#063e2b;color:#63f0b3}.badge.o{background:#4b2b08;color:#ffc56b}.badge.p{background:#35115a;color:#d8a9ff}
+.progress{height:10px;background:#102b4e;border-radius:10px;overflow:hidden}.progress i{display:block;height:100%;background:linear-gradient(90deg,#00e58b,#19c8ff);border-radius:10px}
+.side{display:grid;gap:14px}.ai{border-color:#0bdcff;background:linear-gradient(145deg,#061a3b,#071b45)}.ai strong{color:#6ceaff}
+.form{max-width:650px;margin:25px auto}.form input,.form select{width:100%;padding:13px;margin:7px 0 12px;background:#06162d;border:1px solid #214d7c;border-radius:12px;color:#fff}.hidden{display:none}
+.footer{text-align:center;color:#6f8eae;padding:35px 15px}
+@media(max-width:850px){.col3,.col4,.col6,.col8{grid-column:span 12}.screen{padding:14px}.top{padding:13px}.map{height:300px}}
+</style>
+
+<style>
+.component-shell{margin-top:16px}.component-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}.component-title{font-size:28px;margin:0}.component-sub{color:#9fb8d3;margin:4px 0 0}.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.quick{padding:16px;border-radius:16px;background:#071b38;border:1px solid #184a7c}.quick b{display:block;font-size:17px;margin-bottom:5px}.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.action{width:100%;text-align:left;padding:16px;border-radius:16px;background:linear-gradient(135deg,#082653,#0a3768);border:1px solid #1c5a91;color:#fff}.action:hover{border-color:var(--cyan);transform:translateY(-1px)}.backline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.backline button{background:#071a35;color:#d5e8fb;border:1px solid #194678;padding:9px 12px;border-radius:12px}.phone-preview{max-width:390px;margin:auto;background:#031229;border:2px solid #158cff;border-radius:30px;padding:14px;min-height:520px;box-shadow:0 18px 50px #0008}.phone-preview .notch{width:120px;height:18px;background:#010813;border-radius:0 0 14px 14px;margin:-14px auto 12px}.phone-preview .pbtn{display:block;width:100%;padding:12px;margin:9px 0;border-radius:12px;background:#092b55;border:1px solid #1b568c;color:#fff;text-align:left}.phone-preview .pbtn.primary{background:linear-gradient(135deg,#087cff,#00cfff);font-weight:900}.phone-preview .pbtn.gold{background:linear-gradient(135deg,#ffb300,#ffd85c);color:#111;font-weight:900}.phone-preview .pbtn.green{background:linear-gradient(135deg,#00b96b,#22e89b);color:#062016;font-weight:900}.component-map{height:300px}.money{font-size:30px;font-weight:900;color:var(--green)}
+</style>
+
+<style>
+/* ROTA — nova abertura premium */
+.home-screen{padding-top:18px}
+.home-hero{
+  position:relative; overflow:hidden; min-height:430px; padding:28px 24px 24px;
+  border-radius:30px; border:1px solid rgba(50,164,255,.48);
+  background:
+    radial-gradient(circle at 88% 12%,rgba(0,229,255,.24),transparent 30%),
+    radial-gradient(circle at 10% 85%,rgba(120,72,255,.20),transparent 34%),
+    linear-gradient(145deg,#071d43 0%,#082b59 48%,#07102a 100%);
+  box-shadow:0 25px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.home-hero:before{
+  content:"";position:absolute;inset:-30%;background:
+  linear-gradient(115deg,transparent 44%,rgba(0,229,255,.10) 45%,transparent 46%),
+  linear-gradient(20deg,transparent 57%,rgba(40,130,255,.10) 58%,transparent 59%);
+  transform:rotate(-5deg);pointer-events:none
+}
+.home-topline{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;z-index:1}
+.home-kicker{font-size:12px;font-weight:900;letter-spacing:1.8px;color:#6ee7ff}
+.home-pill{padding:7px 11px;border-radius:999px;background:rgba(0,220,145,.12);border:1px solid rgba(32,232,144,.35);color:#65f3b2;font-size:11px;font-weight:800}
+.home-title{position:relative;z-index:1;font-size:clamp(42px,10vw,76px);line-height:.96;margin:34px 0 14px;font-weight:950;letter-spacing:-2.5px}
+.home-title .gold{color:#ffd13b}.home-title .cyan{color:#63e9ff}
+.home-copy{position:relative;z-index:1;max-width:650px;font-size:17px;line-height:1.45;color:#c3dbf2;margin:0 0 20px}
+.home-actions{position:relative;z-index:1;display:flex;gap:10px;flex-wrap:wrap}
+.home-mainbtn{padding:14px 20px;border-radius:15px;font-weight:950;font-size:15px;background:linear-gradient(135deg,#087cff,#00d9ff);box-shadow:0 12px 30px rgba(0,190,255,.25)}
+.home-mainbtn.gold{background:linear-gradient(135deg,#ffb300,#ffe16a);color:#111}
+.home-visual{
+  position:absolute;right:22px;bottom:22px;width:285px;height:170px;border-radius:24px;
+  border:1px solid rgba(91,190,255,.32);background:rgba(2,14,34,.52);
+  box-shadow:inset 0 0 45px rgba(0,190,255,.08);overflow:hidden;opacity:.9
+}
+.home-visual:before,.home-visual:after{content:"";position:absolute;height:4px;border-radius:9px;background:linear-gradient(90deg,#22d3ee,#3b82f6,#a855f7);transform:rotate(-16deg)}
+.home-visual:before{width:240px;left:20px;top:86px}.home-visual:after{width:190px;left:55px;top:116px}
+.home-pin{position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(0,229,255,.16),0 0 20px #00e5ff;z-index:2}
+.home-pin.p1{left:54px;top:63px}.home-pin.p2{left:145px;top:95px;background:#58f2a8}.home-pin.p3{right:52px;top:120px;background:#ff6379}
+.home-quick{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.home-quick .hq{padding:13px;border-radius:16px;background:rgba(5,25,55,.78);border:1px solid #1b4d80}
+.hq b{display:block;font-size:15px}.hq span{font-size:11px;color:#91afd0}
+.home-section{margin-top:18px}
+.home-section-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:12px}
+.home-section-title h2{margin:0;font-size:22px}.home-section-title span{font-size:11px;color:#7296ba}
+.home-services{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.home-service{
+  position:relative;min-height:118px;padding:17px;border-radius:20px;overflow:hidden;
+  border:1px solid #194b7e;background:linear-gradient(145deg,#071d3d,#06142d);
+  text-align:left;color:#fff;transition:.2s;box-shadow:0 12px 28px rgba(0,0,0,.18)
+}
+.home-service:hover{transform:translateY(-3px);border-color:#27cfff;box-shadow:0 16px 32px rgba(0,170,255,.12)}
+.home-service .hs-ico{font-size:28px}.home-service h3{margin:8px 0 4px;font-size:17px}.home-service p{margin:0;color:#91afd0;font-size:12px;line-height:1.35}
+.home-service:after{content:"›";position:absolute;right:15px;bottom:12px;font-size:22px;color:#59dcff}
+.hs-client{background:linear-gradient(145deg,#08264d,#07152f)}
+.hs-driver{background:linear-gradient(145deg,#062d45,#071a35)}
+.hs-shop{background:linear-gradient(145deg,#20134b,#0d1735)}
+.hs-truck{background:linear-gradient(145deg,#34200b,#11182e)}
+.hs-vip{background:linear-gradient(145deg,#30220a,#111a32);border-color:rgba(255,193,55,.45)}
+.hs-vip h3{color:#ffd35b}
+.home-bottom{
+  margin-top:18px;padding:16px;border-radius:22px;border:1px solid #173e6b;
+  background:linear-gradient(135deg,rgba(8,29,61,.94),rgba(7,16,37,.94));
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap
+}
+.home-bottom strong{font-size:16px}.home-bottom small{display:block;color:#8eacd0;margin-top:4px}
+.home-mini-actions{display:flex;gap:8px;flex-wrap:wrap}.home-mini-actions button{padding:10px 12px;border-radius:12px;background:#09264b;border:1px solid #1b4d80;color:#d9ecff;font-weight:800}
+.home-nav{display:flex;justify-content:space-around;gap:6px;margin:18px 0 4px;padding:8px;border-radius:18px;background:rgba(5,18,40,.9);border:1px solid #173b66;position:sticky;bottom:8px;z-index:4;backdrop-filter:blur(14px)}
+.home-nav button{background:transparent;color:#9eb9d5;padding:8px 9px;border-radius:12px;font-size:11px;font-weight:800}.home-nav button:first-child{background:#0a4380;color:#fff}
+@media(max-width:760px){
+ .home-hero{min-height:560px;padding:22px 18px}.home-title{font-size:48px;margin-top:28px}.home-copy{font-size:15px}
+ .home-visual{left:18px;right:18px;bottom:24px;width:auto}.home-quick{grid-template-columns:repeat(2,1fr)}
+ .home-services{grid-template-columns:1fr}.home-service{min-height:108px}
+}
+</style>
+
+
+<style>
+/* Imagem integrada da abertura */
+.home-hero-photo{
+  position:relative; z-index:1; margin:22px 0 18px; height:220px;
+  border-radius:24px; overflow:hidden;
+  border:1px solid rgba(91,205,255,.38);
+  box-shadow:0 18px 45px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  background:#06152f;
+}
+.home-hero-photo img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  filter:saturate(1.08) contrast(1.04) brightness(.82);
+}
+.home-hero-photo:after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(90deg,rgba(3,14,34,.78) 0%,rgba(3,14,34,.25) 48%,rgba(3,14,34,.50) 100%),
+    linear-gradient(0deg,rgba(3,14,34,.62),transparent 42%);
+  pointer-events:none;
+}
+.home-photo-badge{
+  position:absolute; z-index:2; left:16px; bottom:14px;
+  padding:9px 12px; border-radius:12px;
+  background:rgba(3,17,39,.72); border:1px solid rgba(103,221,255,.28);
+  backdrop-filter:blur(10px); color:#dff7ff; font-size:11px; font-weight:900;
+}
+.home-photo-badge b{color:#6ee7ff}
+@media(max-width:760px){.home-hero-photo{height:205px}}
+</style>
+
+
+<style>
+/* Tela principal inspirada no mockup enviado pelo usuário */
+.home-screen-main{position:relative;isolation:isolate;overflow:hidden;padding:18px 30px 30px;max-width:1500px;background:radial-gradient(circle at 50% 18%,rgba(16,89,150,.18),transparent 35%)}
+.home-screen-main:before{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(2,13,31,.38),rgba(2,13,31,.78) 55%,rgba(2,13,31,.92)),url("cidade_rota_fundo.png") center/cover no-repeat;opacity:.68;pointer-events:none}
+.home-screen-main > *{position:relative;z-index:1}
+.main-header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:8px}.profile-block{display:flex;align-items:center;gap:13px}.profile-avatar{width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.7);box-shadow:0 8px 24px #0008}.hello{font-size:23px;font-weight:900}.profile-sub{font-size:14px;color:#a9c5df;margin-top:4px}.header-actions{display:flex;gap:12px}.header-actions button{position:relative;width:58px;height:58px;border-radius:17px;background:rgba(6,28,59,.8);border:1px solid #1a4a78;color:#e8f6ff;font-size:28px;box-shadow:0 10px 25px #0005}.header-actions .notify i{position:absolute;right:-3px;top:-6px;background:#ef4b55;color:#fff;border-radius:50%;font-size:12px;font-style:normal;padding:5px 7px}.brand-stage{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 14px;text-align:center}.brand-mark{font-size:50px;font-weight:900;color:#c9952f;transform:rotate(-8deg)}.brand-name{font-size:clamp(42px,6vw,76px);font-weight:950;letter-spacing:-3px;color:#b8c3d2;line-height:.9}.brand-name span{color:#d19a35}.brand-tag{font-size:18px;font-weight:900;letter-spacing:5px;color:#d9e4ef;margin-top:9px}.main-shortcuts{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}.main-shortcuts button{min-height:155px;border-radius:24px;background:linear-gradient(145deg,rgba(9,42,79,.92),rgba(5,25,51,.94));border:1px solid #1a507f;color:#fff;box-shadow:0 15px 30px #0005;transition:.18s}.main-shortcuts button:hover{transform:translateY(-3px);border-color:#39cfff}.main-shortcuts span{display:block;font-size:58px;margin-bottom:8px}.main-shortcuts b{font-size:19px}.main-shortcuts .vip-short{background:linear-gradient(145deg,rgba(58,43,13,.95),rgba(12,26,49,.95));border-color:#8d6a24}.main-section-title{display:flex;align-items:end;justify-content:space-between;margin:18px 0 10px}.main-section-title h2{margin:0;font-size:28px}.main-section-title button{background:#102c4d;color:#fff;border:1px solid #28577e;border-radius:12px;padding:8px 14px}.for-you-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.for-you-grid button{display:flex;align-items:center;gap:12px;text-align:left;padding:15px;border-radius:19px;background:rgba(7,31,61,.76);border:1px solid #1b4b78;color:#fff;min-height:92px}.for-you-grid strong{display:grid;place-items:center;width:58px;height:58px;border-radius:15px;background:linear-gradient(135deg,#6b38e6,#4730bd);font-size:27px}.for-you-grid button:nth-child(2) strong{background:linear-gradient(135deg,#18b76b,#00a56a)}.for-you-grid button:nth-child(3) strong{background:linear-gradient(135deg,#ff9f2e,#ff6b13)}.for-you-grid button:nth-child(4) strong{background:linear-gradient(135deg,#168ce9,#0b5fd0)}.for-you-grid b,.service-list b{display:block;font-size:16px}.for-you-grid small,.service-list small{display:block;color:#a8c0d9;font-size:12px;line-height:1.35;margin-top:4px}.service-list{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.service-list button{display:flex;align-items:center;gap:14px;min-height:112px;padding:15px 18px;text-align:left;color:#fff;border-radius:20px;background:linear-gradient(145deg,rgba(7,30,59,.80),rgba(5,20,40,.80));border:1px solid #1a4a78;box-shadow:0 10px 25px #0004}.service-list em{font-style:normal;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;font-size:30px;flex:0 0 auto}.s-green{background:linear-gradient(135deg,#18c870,#00a85b)}.s-orange{background:linear-gradient(135deg,#ff9f22,#ff6b00)}.s-blue{background:linear-gradient(135deg,#1d9cf0,#166bd0)}.s-purple{background:linear-gradient(135deg,#8a4de8,#6730c5)}.s-cyan{background:linear-gradient(135deg,#13cbd2,#0c92b7)}.s-pink{background:linear-gradient(135deg,#ed4f84,#d52f67)}.s-gold{background:linear-gradient(135deg,#ffd25c,#d99116)}.s-teal{background:linear-gradient(135deg,#25c9ae,#087f8d)}.service-list button>i{margin-left:auto;font-size:32px;color:#8caac5;font-style:normal}.offers-title{margin-top:20px}.offer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.offer-card{overflow:hidden;text-align:left;padding:0;border-radius:20px;background:rgba(6,25,50,.94);border:1px solid #1c4e7a;color:#fff;box-shadow:0 12px 28px #0005}.offer-art{height:130px;display:grid;place-items:center;font-size:76px;background:linear-gradient(135deg,#1d2330,#4c3824)}.offer-card.tech .offer-art{background:linear-gradient(135deg,#b6b4af,#474746)}.offer-card.truck .offer-art{background:linear-gradient(135deg,#e5b55c,#f2d7a4)}.offer-card.plane .offer-art{background:linear-gradient(135deg,#8dcaf4,#e1f2ff)}.offer-body{padding:12px 14px}.offer-body b{display:block;font-size:16px}.offer-body small{display:block;color:#a8bfd5;margin:5px 0 8px}.offer-body strong{font-size:18px;color:#20e890}.offer-card.plane .offer-body strong,.offer-card.truck .offer-body strong{color:#19c8ff}.offer-badge{position:absolute;margin:10px;padding:6px 9px;border-radius:999px;font-size:10px;font-weight:900;z-index:1}.offer-card{position:relative}.offer-badge.green{background:#12a866}.offer-badge.orange{background:#f59e0b}.offer-badge.blue{background:#1597d8}.offer-badge.red{background:#e94358}.main-bottom-nav{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:20px 0 5px;padding:8px;border-radius:22px;background:rgba(5,20,40,.86);border:1px solid #1a466f;box-shadow:0 18px 35px #0007;position:sticky;bottom:8px;z-index:8;backdrop-filter:blur(15px)}.main-bottom-nav button{background:transparent;color:#b1c5da;border-radius:15px;padding:9px 5px;font-size:11px;font-weight:800}.main-bottom-nav button span{display:block;font-size:24px;margin-bottom:4px}.main-bottom-nav button.active{color:#ffd34d;background:rgba(255,196,54,.08)}
+@media(max-width:900px){.home-screen-main{padding:14px}.main-shortcuts{grid-template-columns:repeat(3,1fr)}.for-you-grid{grid-template-columns:repeat(2,1fr)}.offer-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.main-header{align-items:flex-start}.profile-avatar{width:54px;height:54px}.hello{font-size:18px}.header-actions{gap:6px}.header-actions button{width:43px;height:43px;font-size:22px;border-radius:13px}.brand-name{font-size:39px}.brand-tag{font-size:10px;letter-spacing:3px}.main-shortcuts{grid-template-columns:repeat(2,1fr)}.main-shortcuts button{min-height:125px}.main-shortcuts span{font-size:43px}.for-you-grid,.service-list,.offer-grid{grid-template-columns:1fr}.offer-grid{grid-auto-flow:column;grid-auto-columns:78%;overflow-x:auto}.main-bottom-nav{grid-template-columns:repeat(4,1fr)}.main-bottom-nav button:nth-child(n+5){display:none}}
+</style>
+
+<style>
+.avatar-initials{display:grid;place-items:center;background:linear-gradient(135deg,#168ce9,#7c3aed);font-weight:900;font-size:28px;color:#fff}
+.live-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:rgba(11,92,67,.75);border:1px solid #20e890;color:#7ff5bf;font-size:11px;font-weight:900}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#20e890;box-shadow:0 0 12px #20e890}
+.flow-card{background:linear-gradient(145deg,rgba(8,35,68,.92),rgba(4,19,39,.95));border:1px solid #1c5a91;border-radius:22px;padding:20px;box-shadow:0 14px 35px #0006}
+.flow-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #173b61}.flow-step:last-child{border-bottom:0}.flow-num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#0b6db8;font-weight:900;flex:0 0 auto}.success{border-color:#20e890;background:linear-gradient(145deg,rgba(4,57,42,.88),rgba(4,28,31,.94))}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;z-index:50;background:#071b38;border:1px solid #2b6fa8;border-radius:15px;padding:13px 18px;box-shadow:0 14px 40px #0009;transition:.25s;font-weight:800}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body><div class="app">
+<header class="top"><div><div class="logo"><b>R</b>OTA</div><div class="tag">Tudo em um só lugar.</div></div><div id="status" class="badge g">● Sistema online</div></header>
+
+<section id="home" class="screen active home-screen-main">
+  <div class="main-header">
+    <div class="profile-block">
+      <div class="profile-avatar avatar-initials">D</div>
+      <div><div class="hello">Olá, Danilo</div><div class="profile-sub">Cliente • ROTA</div></div>
+    </div>
+    <div class="header-actions">
+      <button onclick="alert('Busca geral do ROTA — demonstração')">⌕</button>
+      <button class="notify" onclick="alert('Você tem 3 notificações novas')">♧<i>3</i></button>
+      <button onclick="alert('Central de mensagens do ROTA — demonstração')">▰</button>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:8px"><span class="live-pill"><span class="live-dot"></span> ROTA EM FUNCIONAMENTO • SIMULAÇÃO</span></div>
+  <div class="brand-stage">
+    <div class="brand-mark">↗</div><div><div class="brand-name">ROTA <span>ÚNICA</span></div><div class="brand-tag">TUDO EM UM SÓ LUGAR</div></div>
+  </div>
+
+  <div class="main-shortcuts">
+    <button onclick="openClientFlow('Nova entrega')"><span>📦</span><b>Entregas</b></button>
+    <button onclick="openClientFlow('Comprar')"><span>🛍️</span><b>Compras</b></button>
+    <button onclick="openTruckFlow()"><span>🚚</span><b>Cargas</b></button>
+    <button onclick="openClientFlow('Passagens')"><span>✈️</span><b>Passagens</b></button>
+    <button class="vip-short" onclick="openVipFlow()"><span>🛡️</span><b>Área VIP</b></button>
+  </div>
+
+  <div class="main-section-title"><h2>Para você</h2></div>
+  <div class="for-you-grid">
+    <button onclick="openQuoteFlow()"><strong>📍</strong><span><b>Cotação rápida</b><small>Compare preços de entregas e fretes</small></span></button>
+    <button onclick="openClientFlow('Comprar')"><strong>🛍️</strong><span><b>Ofertas do dia</b><small>Produtos e serviços com descontos</small></span></button>
+    <button onclick="openTruckFlow()"><strong>🚚</strong><span><b>Fretes e cargas</b><small>Caminhões e transportadoras</small></span></button>
+    <button onclick="openClientFlow('Passagens')"><strong>✈️</strong><span><b>Passagens</b><small>Melhores preços para você</small></span></button>
+  </div>
+
+  <div class="main-section-title"><h2>Serviços do ROTA</h2></div>
+  <div class="service-list">
+    <button onclick="openForm('Entregador')"><em class="s-green">🛵</em><span><b>Sou Entregador</b><small>Ganhe mais com mais rotas e melhores corridas</small></span><i>›</i></button>
+    <button onclick="openForm('Vendedor / Loja')"><em class="s-orange">🏪</em><span><b>Sou Vendedor / Loja</b><small>Cadastre produtos e venda para todo o Brasil</small></span><i>›</i></button>
+    <button onclick="openForm('Caminhoneiro')"><em class="s-blue">🚚</em><span><b>Sou Transportadora</b><small>Publique cargas e encontre clientes</small></span><i>›</i></button>
+    <button onclick="openForm('Empresa / VIP')"><em class="s-purple">🏢</em><span><b>Empresa — Área VIP</b><small>Logística, vendas, cargas e gestão com CNPJ</small></span><i>›</i></button>
+    <button onclick="openClientFlow('Passagens')"><em class="s-cyan">✈️</em><span><b>Passagens</b><small>Aéreas e rodoviárias com os melhores preços</small></span><i>›</i></button>
+    <button onclick="openClientFlow('Comprar')"><em class="s-pink">🏷️</em><span><b>Quero comprar</b><small>Encontre produtos, serviços e promoções</small></span><i>›</i></button>
+    <button onclick="render('Cliente');openArea('Cliente','Feedback');show('dashboard')"><em class="s-gold">⭐</em><span><b>Feedback do ROTA</b><small>Veja avaliações e ajude a melhorar o aplicativo</small></span><i>›</i></button>
+    <button onclick="openCounterFlow()"><em class="s-teal">🧾</em><span><b>Encontrar contador</b><small>Encontre apoio contábil para sua empresa</small></span><i>›</i></button>
+  </div>
+
+  <div class="main-section-title offers-title"><h2>Melhores ofertas</h2><button onclick="alert('Todas as ofertas — demonstração')">Ver todas</button></div>
+  <div class="offer-grid">
+    <button class="offer-card burger" onclick="openClientFlow('Comprar')"><span class="offer-badge green">Entrega rápida</span><div class="offer-art">🍔</div><div class="offer-body"><b>Hambúrguer Artesanal</b><small>Na sua porta hoje</small><strong>R$ 24,90</strong></div></button>
+    <button class="offer-card tech" onclick="openClientFlow('Comprar')"><span class="offer-badge orange">Oferta</span><div class="offer-art">🎧</div><div class="offer-body"><b>Fone Bluetooth Pro</b><small>Som potente e bateria longa</small><strong>R$ 129,90</strong></div></button>
+    <button class="offer-card truck" onclick="openTruckFlow()"><span class="offer-badge blue">Melhor preço</span><div class="offer-art">🚛</div><div class="offer-body"><b>Frete São Paulo → Rio</b><small>A partir de</small><strong>R$ 1.480</strong></div></button>
+    <button class="offer-card plane" onclick="openClientFlow('Passagens')"><span class="offer-badge red">-30%</span><div class="offer-art">✈️</div><div class="offer-body"><b>Passagem para Salvador</b><small>Voo direto • ida e volta</small><strong>R$ 698</strong></div></button>
+  </div>
+
+  <div class="main-bottom-nav">
+    <button class="active" onclick="show('home')"><span>⌂</span>Início</button>
+    <button onclick="openExploreFlow()"><span>⌕</span>Explorar</button>
+    <button onclick="openForm('Vendedor / Loja')"><span>🛍</span>Vendas</button>
+    <button onclick="openForm('Caminhoneiro')"><span>🚚</span>Cargas</button>
+    <button onclick="openClientFlow('Passagens')"><span>✈</span>Passagens</button>
+    <button onclick="openClientFlow('Financeiro')"><span>▥</span>Financeiro</button>
+    <button onclick="show('roles')"><span>▦</span>Menu</button>
+  </div>
+</section>
+
+<section id="service" class="screen">
+  <div id="service-content"></div>
+</section>
+
+<section id="roles" class="screen">
+  <div class="hero"><h1>Crie seu acesso</h1><p>Escolha como você vai usar o ROTA. O acesso de administrador fica separado e protegido.</p></div>
+  <div class="roles">
+    <button class="role" onclick="openForm('Cliente')"><div class="ico">📦</div><h3>Sou Cliente</h3><div class="muted">Pessoa</div></button>
+    <button class="role" onclick="openForm('Entregador')"><div class="ico">🛵</div><h3>Sou Entregador</h3><div class="muted">Pessoa</div></button>
+    <button class="role" onclick="openForm('Vendedor / Loja')"><div class="ico">🏪</div><h3>Sou Vendedor</h3><div class="muted">Pessoa ou empresa</div></button>
+    <button class="role" onclick="openForm('Caminhoneiro')"><div class="ico">🚛</div><h3>Sou Caminhoneiro</h3><div class="muted">Pessoa ou transportadora</div></button>
+    <button class="role" onclick="openForm('Empresa / VIP')"><div class="ico">👑</div><h3>Área VIP</h3><div class="muted">Empresa / CNPJ</div></button>
+  </div>
+  <div id="formbox" class="card form hidden"></div>
+</section>
+
+<section id="dashboard" class="screen"></section>
+<section id="admin" class="screen"></section>
+<div id="toast" class="toast"></div><div class="footer">ROTA • Tudo em um só lugar • Simulação visual/interativa</div>
+</div>
+
+<script>
+const esc=s=>s;
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');scrollTo(0,0)}
+function openForm(role){
+ const f=document.getElementById('formbox'); f.classList.remove('hidden');
+ const company=/Vendedor|Empresa/.test(role);
+ f.innerHTML=`<h2>${role}</h2>
+ <label>Nome / responsável</label><input placeholder="Seu nome">
+ <label>${company?'CNPJ':'CPF'}</label><input placeholder="${company?'00.000.000/0001-00':'000.000.000-00'}">
+ ${company?'<label>Nome da empresa</label><input placeholder="Nome da empresa">':''}
+ <label>Telefone ou e-mail</label><input placeholder="Contato">
+ <label>Senha</label><input type="password" placeholder="Crie uma senha">
+ <button class="btn green" onclick="enter('${role}')">Criar acesso e continuar</button>`;
+ f.scrollIntoView({behavior:'smooth'});
+}
+function enter(role){
+ alert('Acesso de demonstração criado. Agora a IA explicaria o ROTA e você entraria na sua área.');
+ render(role); show('dashboard');
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function serviceView(title,sub,html){document.getElementById('service-content').innerHTML=`<div class="hero"><div class="live-pill"><span class="live-dot"></span> SIMULAÇÃO EM FUNCIONAMENTO</div><h1>${title}</h1><p>${sub}</p><div class="backline"><button onclick="show('home')">← Voltar para o início</button></div></div><div class="component-shell">${html}</div>`;show('service')}
+function openClientFlow(area){render('Cliente');openArea('Cliente',area);show('dashboard');toast('Abrindo área do cliente…')}
+function openTruckFlow(){render('Caminhoneiro');openArea('Caminhoneiro','Cargas');show('dashboard');toast('Buscando cargas compatíveis…')}
+function openVipFlow(){serviceView('👑 Contratação ROTA VIP','A empresa entra, confere as condições e aceita o contrato antes de usar a Área VIP.',`<div class="grid"><div class="flow-card col8"><h2>📑 Contrato ROTA VIP</h2><div class="flow-step"><span class="flow-num">1</span><div><b>Dados da empresa</b><div class="muted">CNPJ, responsável e dados operacionais.</div></div></div><div class="flow-step"><span class="flow-num">2</span><div><b>Comissão ROTA</b><div class="muted">Exemplo do contrato: <strong class="goldText">5%</strong> sobre as operações previstas.</div></div></div><div class="flow-step"><span class="flow-num">3</span><div><b>Regras e responsabilidades</b><div class="muted">Uso da plataforma, pagamentos, dados, suporte e encerramento.</div></div></div><div class="flow-step"><span class="flow-num">4</span><div><b>Confirmação</b><div class="muted">A empresa vê o valor da operação e a comissão antes de aceitar.</div></div></div><label style="display:block;margin:16px 0"><input id="vipAgree" type="checkbox"> Li e concordo com o Contrato e os Termos da ROTA.</label><button class="btn gold" onclick="acceptVip()">ASSINAR / ACEITAR CONTRATO</button></div><div class="flow-card col4"><h3>💎 O que a empresa recebe</h3><div class="quick-grid"><div class="quick"><b>🚚 Operações</b><span class="muted">Entregas e cargas.</span></div><div class="quick"><b>🗺️ Rotas inteligentes</b><span class="muted">Mais eficiência.</span></div><div class="quick"><b>📊 Indicadores</b><span class="muted">Controle e crescimento.</span></div><div class="quick"><b>🤖 ROTA IA</b><span class="muted">Assistente empresarial.</span></div></div></div></div>`)}
+function acceptVip(){if(!document.getElementById('vipAgree').checked){toast('Marque o aceite do contrato para continuar.');return}toast('Contrato aceito na simulação. Entrando na Área VIP…');setTimeout(()=>{render('Empresa / VIP');openArea('Empresa / VIP','Início');show('dashboard')},500)}
+function openCounterFlow(){serviceView('🧾 Encontrar contador','Uma central dentro do ROTA para empresas encontrarem profissionais compatíveis.',`<div class="grid"><div class="card col8"><div class="main-section-title"><h2>Contadores disponíveis</h2><span class="badge g">Atualizado</span></div><div class="list"><div class="row"><span><b>CRC Consultoria Empresarial</b><br><small>Empresas • Simples Nacional • Fiscal</small></span><button class="btn" onclick="toast('Solicitação enviada para a demonstração.')">Solicitar</button></div><div class="row"><span><b>Contábil Brasil</b><br><small>MEI • Pequenas empresas • Folha</small></span><button class="btn" onclick="toast('Solicitação enviada para a demonstração.')">Solicitar</button></div><div class="row"><span><b>Contador Parceiro ROTA</b><br><small>Logística • Marketplace • Transportes</small></span><button class="btn" onclick="toast('Solicitação enviada para a demonstração.')">Solicitar</button></div></div></div><div class="card ai col4"><strong>🤖 IA do ROTA</strong><p>Posso filtrar profissionais por cidade, atividade e necessidade da empresa.</p><button class="btn" onclick="toast('Filtros inteligentes ativados.')">Filtrar com IA</button></div></div>`)}
+function openQuoteFlow(){serviceView('📍 Cotação rápida','Compare uma entrega ou frete antes de confirmar.',`<div class="grid"><div class="card col6"><h2>📦 Entrega</h2><input class="form input" style="width:100%;padding:13px;background:#06162d;border:1px solid #214d7c;border-radius:12px;color:#fff" placeholder="Origem"><input style="width:100%;padding:13px;background:#06162d;border:1px solid #214d7c;border-radius:12px;color:#fff;margin-top:10px" placeholder="Destino"><button class="btn green" style="margin-top:12px" onclick="toast('3 opções encontradas na simulação.')">Calcular</button></div><div class="card col6"><h2>🚛 Frete</h2><p class="muted">Exemplo de comparação</p><div class="list"><div class="row"><span>Opção A</span><b>R$ 1.480</b></div><div class="row"><span>Opção B</span><b>R$ 1.620</b></div><div class="row"><span>Opção C</span><b>R$ 1.790</b></div></div></div></div>`)}
+function openExploreFlow(){serviceView('🔎 Explorar ROTA','Encontre serviços, ofertas, parceiros e oportunidades.',`<div class="action-grid"><button class="action" onclick="openClientFlow('Comprar')"><b>🛍️ Marketplace</b><span class="muted">Produtos e ofertas.</span></button><button class="action" onclick="openTruckFlow()"><b>🚛 Cargas</b><span class="muted">Fretes e transportadoras.</span></button><button class="action" onclick="openCounterFlow()"><b>🧾 Contadores</b><span class="muted">Apoio para empresas.</span></button><button class="action" onclick="openVipFlow()"><b>👑 Área VIP</b><span class="muted">Contrate a plataforma.</span></button></div>`)}
+function simulateDelivery(){serviceView('📦 Entrega em andamento','Simulação: o pedido foi criado e o ROTA está procurando um entregador próximo.',`<div class="grid"><div class="flow-card col8 success"><h2>🟢 Pedido #4587</h2><div class="flow-step"><span class="flow-num">✓</span><div><b>Pedido criado</b><div class="muted">Origem e destino confirmados.</div></div></div><div class="flow-step"><span class="flow-num">2</span><div><b>ROTA procurando entregador</b><div class="muted">O sistema prioriza proximidade e eficiência da rota.</div></div></div><div class="flow-step"><span class="flow-num">3</span><div><b>Próximo passo</b><div class="muted">Entregador aceita → coleta → entrega → avaliação.</div></div></div></div><div class="card col4 ai"><strong>🤖 IA do ROTA</strong><p>Encontrei 3 entregadores compatíveis na região.</p><button class="btn" onclick="toast('Melhor opção selecionada na simulação.')">Escolher melhor rota</button></div></div>`)}
+function adminLogin(){
+ const ok=confirm('🔐 ACESSO ADMINISTRADOR\n\nEsta é a entrada separada do administrador.\n\nNo sistema real, aqui haverá login protegido, 2FA e autorização no servidor.\n\nEntrar como administrador de TESTE?');
+ if(!ok)return;
+ renderAdmin(); show('admin');
+}
+function renderAdmin(){
+ document.getElementById('admin').innerHTML=`<div class="hero"><div class="muted">ACESSO RESTRITO</div><h1>🔐 Painel do Administrador</h1><p>Área separada dos usuários comuns. No sistema real, o acesso será protegido por autenticação e permissões no servidor.</p><button class="btn gold" onclick="show('home')">Sair do administrador</button></div>
+ <div class="grid" style="margin-top:16px">
+ <div class="card kpi col3"><div>👥 Usuários</div><div class="n blueText">1.248</div><div class="muted">clientes, entregadores e parceiros</div></div>
+ <div class="card kpi col3"><div>📦 Operações</div><div class="n greenText">3.842</div><div class="muted">no período demonstrativo</div></div>
+ <div class="card kpi col3"><div>💰 Comissão ROTA</div><div class="n goldText">R$ 18.450</div><div class="muted">demonstrativo</div></div>
+ <div class="card kpi col3"><div>👑 Empresas VIP</div><div class="n purpleText">37</div><div class="muted">contas ativas</div></div>
+ <div class="card col8"><h2>🧭 Central de Controle</h2><div class="list">
+ <button class="btn" onclick="alert('Usuários: clientes, entregadores, vendedores e caminhoneiros.')">👥 Usuários e permissões</button>
+ <button class="btn" onclick="alert('Operações: entregas, vendas, cargas e passagens.')">📦 Operações</button>
+ <button class="btn" onclick="alert('VIP: empresas, contratos, propostas e crescimento.')">👑 Área VIP</button>
+ <button class="btn gold" onclick="alert('Financeiro: comissões, movimentações e repasses. Dados bancários sensíveis permanecem protegidos.')">💰 Financeiro</button>
+ <button class="btn green" onclick="alert('Segurança: auditoria, sessões, alertas e backups.')">🛡️ Segurança</button>
+ <button class="btn" onclick="alert('Relatórios e indicadores gerais da plataforma.')">📊 Relatórios</button>
+ </div></div>
+ <div class="side col4"><div class="card ai"><strong>🤖 IA Administrativa</strong><p>Resumo: a plataforma está em modo de teste. Posso orientar sobre operações, usuários, VIP, financeiro e segurança.</p><button class="btn">Abrir IA</button></div><div class="card"><h3>🔒 Proteção</h3><p>✓ Login separado<br>✓ Permissões por função<br>✓ Auditoria<br>✓ 2FA preparado<br>✓ Senhas nunca exibidas ao administrador</p></div></div>
+ </div>`;
+}
+function nav(role,items){
+ return `<div class="nav">${items.map((x,i)=>`<button class="${i==0?'active':''}" onclick="openArea('${role}','${x.replace("'","\\'")}')">${x}</button>`).join('')}</div>`;
+}
+function openArea(role,area){
+ const d=document.getElementById('dashboard');
+ const map={
+  'Entregador':{title:'🛵 Área do Entregador',sub:'Cada função do entregador fica dentro da própria tela.',items:['Início','Entregas','Mapa','Minhas rotas','Financeiro','Feedback','Perfil']},
+  'Caminhoneiro':{title:'🚛 Área do Caminhoneiro',sub:'Cargas, viagens, rotas, veículo e ganhos em telas separadas.',items:['Início','Mapa do Brasil','Cargas','Minhas viagens','Financeiro','Feedback','Veículo','Perfil']},
+  'Vendedor / Loja':{title:'🏪 Área do Vendedor / Loja',sub:'Produtos, pedidos, ofertas, vendas e entrega em seus próprios espaços.',items:['Início','Produtos','Pedidos','Ofertas','Vendas','Financeiro','Feedback','Entrega']},
+  'Empresa / VIP':{title:'👑 Área VIP da Empresa',sub:'Operação premium para vender mais, contratar, acompanhar e crescer.',items:['Início','Vendas','Contratos','Pedidos e Entregas','Frota','Financeiro','Crescimento','IA Empresarial','Catálogo','Ofertas VIP','Equipe','Relatórios','Feedback']},
+  'Cliente':{title:'📦 Área do Cliente',sub:'Comprar, pedir entrega, rastrear, passagens e histórico em seus próprios espaços.',items:['Início','Comprar','Nova entrega','Rastrear','Passagens','Histórico','Feedback','Perfil']}
+ }[role];
+ if(!map)return;
+ const tabs=map.items.map((x,i)=>`<button class="${x===area?'active':''}" onclick="openArea('${role}','${x.replace("'","\\'")}')">${x}</button>`).join('');
+ d.innerHTML=`<div class="hero"><div class="muted">${role.toUpperCase()}</div><h1>${map.title}</h1><p>${map.sub}</p><div class="backline"><button onclick="show('roles')">← Trocar área</button><button onclick="openArea('${role}','Início')">⌂ Início</button></div></div><div class="nav">${tabs}</div><div class="component-shell">${areaContent(role,area)}</div>`;
+ scrollTo(0,0);
+}
+function areaContent(role,area){
+ const generic={
+  'Início':`<div class="grid"><div class="card col8"><h2>Seu espaço no ROTA</h2><p>Esta é a tela principal deste componente. As outras funções ficam separadas no menu acima.</p><div class="quick-grid"><div class="quick"><b>⚡ Acesso rápido</b><span class="muted">Abra a função que precisa.</span></div><div class="quick"><b>🤖 IA do ROTA</b><span class="muted">Assistente disponível dentro da área.</span></div><div class="quick"><b>🔔 Avisos</b><span class="muted">Novidades e movimentações.</span></div></div></div><div class="card ai col4"><strong>🤖 IA do ROTA</strong><p>Posso orientar você dentro desta área.</p><button class="btn" onclick="alert('IA de demonstração: orientação da área '+role)">Abrir IA</button></div></div>`,
+  'Feedback':`<div class="grid"><div class="card col8"><div class="muted">EXPERIÊNCIA REALISTA • SIMULAÇÃO</div><h2>⭐ Feedback do ROTA</h2><p>Veja como seria a central de avaliações depois que o ROTA já estivesse funcionando no mercado.</p><div class="grid" style="margin-top:12px"><div class="card kpi col4"><div>⭐ Nota média</div><div class="n goldText">4,8</div><div class="muted">1.284 avaliações</div></div><div class="card kpi col4"><div>😊 Recomendam</div><div class="n greenText">94%</div><div class="muted">usuários satisfeitos</div></div><div class="card kpi col4"><div>⚡ Atendimento</div><div class="n blueText">4,9/5</div><div class="muted">experiência de suporte</div></div></div><div class="list" style="margin-top:14px"><div class="row"><span>⭐⭐⭐⭐⭐<br><b>Mariana • Cliente</b><br><small>“Gostei de acompanhar a entrega em tempo real. Ficou muito mais fácil.”</small></span><span class="badge g">Verificado</span></div><div class="row"><span>⭐⭐⭐⭐⭐<br><b>João • Entregador</b><br><small>“Os pedidos aparecem perto de mim e a rota ajuda bastante.”</small></span><span class="badge g">Verificado</span></div><div class="row"><span>⭐⭐⭐⭐<br><b>Comercial Alfa • Empresa VIP</b><br><small>“O painel de operações e os relatórios ajudam a controlar melhor os custos.”</small></span><span class="badge g">VIP</span></div><div class="row"><span>⭐⭐⭐⭐⭐<br><b>Ricardo • Caminhoneiro</b><br><small>“Gostei de ver o valor líquido do frete antes de aceitar.”</small></span><span class="badge g">Verificado</span></div></div></div><div class="card col4 ai"><strong>🤖 IA do ROTA</strong><p>Analisei os comentários recentes: o que mais aparece é facilidade de uso, rastreamento e clareza dos valores.</p><button class="btn" onclick="alert('IA: satisfação 94%. Principais elogios: praticidade, rastreamento e rotas. Principal melhoria sugerida: ampliar cobertura de parceiros.')">Analisar feedback</button></div><div class="card col12"><h3>✍️ Enviar meu feedback</h3><p class="muted">Simulação: em produção, esta avaliação seria registrada no sistema.</p><div class="action-grid"><button class="action" onclick="alert('Obrigado! Seu feedback de 5 estrelas foi registrado na simulação.')"><b>⭐⭐⭐⭐⭐ Excelente</b><span class="muted">Quero recomendar o ROTA</span></button><button class="action" onclick="alert('Feedback de melhoria registrado na simulação.')"><b>🛠️ Tenho uma sugestão</b><span class="muted">Ajudar a melhorar o aplicativo</span></button><button class="action" onclick="alert('Solicitação de suporte registrada na simulação.')"><b>🆘 Preciso de ajuda</b><span class="muted">Falar com atendimento</span></button></div></div></div>`,
+  'Perfil':`<div class="grid"><div class="card col6"><h2>👤 Meu perfil</h2><div class="list"><div class="row"><span>Nome</span><b>Usuário ROTA</b></div><div class="row"><span>Contato</span><b>••••••••</b></div><div class="row"><span>Verificação</span><span class="badge g">Protegido</span></div></div></div><div class="phone-preview"><div class="notch"></div><h2>ROTA</h2><p class="muted">Perfil e configurações</p><button class="pbtn">👤 Meus dados</button><button class="pbtn">🔒 Segurança</button><button class="pbtn">🔔 Notificações</button><button class="pbtn gold">Sair</button></div></div>`,
+  'Financeiro':`<div class="grid"><div class="card col6"><div class="muted">Saldo disponível</div><div class="money">R$ 1.250,00</div><div class="quick-grid" style="margin-top:14px"><div class="quick"><b>💳 Depósitos</b><span class="muted">Movimentações</span></div><div class="quick"><b>↔️ Transferências</b><span class="muted">Repasses</span></div></div></div><div class="card col6"><h2>📊 Extrato</h2><div class="list"><div class="row"><span>Comissão de entrega</span><b class="greenText">+ R$ 18,50</b></div><div class="row"><span>Venda / operação</span><b class="greenText">+ R$ 127,90</b></div><div class="row"><span>Pagamento / frete</span><b class="greenText">+ R$ 450,00</b></div></div></div></div>`,
+  'Mapa':`<div class="grid"><div class="card col8"><h2>🗺️ Mapa e rotas</h2><div class="map component-map"><span class="pin" style="left:22%;top:35%">🟢</span><span class="pin" style="left:63%;top:58%">🔴</span><span class="pin" style="left:78%;top:25%">🟢</span><span class="line" style="left:23%;top:40%;width:52%;transform:rotate(15deg)"></span></div></div><div class="card col4"><h3>📍 Sua rota</h3><div class="list"><div class="row"><span>Entrega 1</span><b>2,4 km</b></div><div class="row"><span>Entrega 2</span><b>4,7 km</b></div><div class="row"><span>Entrega 3</span><b>6,2 km</b></div></div></div></div>`,
+  'Mapa do Brasil':`<div class="card"><h2>🗺️ Mapa do Brasil</h2><p class="muted">Cargas compatíveis aparecem por região e rota.</p><div class="map component-map"><span class="pin" style="left:27%;top:55%">🟢</span><span class="pin" style="left:44%;top:45%">🟠</span><span class="pin" style="left:68%;top:32%">🔵</span><span class="pin" style="left:76%;top:52%">🟢</span><span class="line" style="left:28%;top:58%;width:52%;transform:rotate(-16deg)"></span></div></div>`,
+  'Entregas':`<div class="grid"><div class="card col8"><h2>📦 Pedidos disponíveis</h2><div class="list"><div class="row"><span>Restaurante Sabor & Massa<br><small>2,4 km • 12 min</small></span><button class="btn gold">Aceitar</button></div><div class="row"><span>Padaria Central<br><small>4,7 km • 20 min</small></span><button class="btn gold">Aceitar</button></div><div class="row"><span>Supermercado Ideal<br><small>6,2 km • 25 min</small></span><button class="btn gold">Aceitar</button></div></div></div><div class="card col4 ai"><strong>🤖 ROTA IA</strong><p>3 pedidos combinam com sua área.</p><button class="btn">Ver oportunidades</button></div></div>`,
+  'Cargas':`<div class="card"><h2>🚚 Cargas disponíveis</h2><div class="list"><div class="row"><span>São Paulo → Fortaleza<br><small>1.850 km • 10 t</small></span><b>R$ 4.200</b></div><div class="row"><span>Bahia → São Paulo<br><small>2.000 km • 15 t</small></span><b>R$ 8.500</b></div></div><p class="muted">Taxa ROTA e valor líquido aparecem antes da confirmação.</p></div>`,
+  'Produtos':`<div class="card"><h2>🛒 Meus produtos</h2><div class="action-grid"><button class="action"><b>➕ Cadastrar produto</b><span class="muted">Adicionar item ao catálogo.</span></button><button class="action"><b>🏷️ Gerenciar preços</b><span class="muted">Ofertas e valores.</span></button><button class="action"><b>📦 Estoque</b><span class="muted">Controle de disponibilidade.</span></button></div></div>`,
+  'Pedidos':`<div class="card"><h2>📦 Pedidos da loja</h2><div class="list"><div class="row"><span>#4587 • Novo pedido</span><span class="badge o">Aguardando envio</span></div><div class="row"><span>#4582 • Pedido em rota</span><span class="badge g">Entregando</span></div></div></div>`,
+  'Ofertas':`<div class="card"><h2>🏷️ Ofertas e preços</h2><div class="action-grid"><button class="action"><b>🔥 Criar promoção</b><span class="muted">Destaque seus produtos.</span></button><button class="action"><b>📍 Oferta por região</b><span class="muted">Aumente alcance local.</span></button></div></div>`,
+  'Vendas':`<div class="grid"><div class="card col4 kpi"><div>Vendas hoje</div><div class="n greenText">R$ 4.850</div></div><div class="card col8"><h2>📈 Desempenho</h2><div class="progress"><i style="width:78%"></i></div><p>78% da meta demonstrativa.</p></div></div>`,
+  'Entrega':`<div class="card"><h2>🛵 Entrega pelo ROTA</h2><p>Escolha uma entrega para o pedido e acompanhe o status.</p><div class="action-grid"><button class="action"><b>⚡ Enviar agora</b><span class="muted">Encontrar entregador próximo.</span></button><button class="action"><b>🗓️ Agendar</b><span class="muted">Definir data e horário.</span></button></div></div>`,
+  'Comprar':`<div class="card"><h2>🛍️ Marketplace</h2><input style="width:100%;padding:13px;background:#06162d;border:1px solid #214d7c;border-radius:12px;color:white" placeholder="Buscar produtos, categorias..."><div class="quick-grid" style="margin-top:14px"><div class="quick"><b>Eletrônicos</b><span class="muted">Ofertas</span></div><div class="quick"><b>Moda</b><span class="muted">Novidades</span></div><div class="quick"><b>Casa</b><span class="muted">Mais vendidos</span></div></div></div>`,
+  'Nova entrega':`<div class="card form" style="margin:0 auto"><h2>📦 Nova entrega</h2><input placeholder="Onde buscar?"><input placeholder="Onde entregar?"><select><option>Entrega comum</option><option>Entrega expressa</option></select><button class="btn green" onclick="simulateDelivery()">Solicitar entrega</button></div>`,
+  'Rastrear':`<div class="card"><h2>📍 Rastrear pedido</h2><div class="row"><span>Pedido #4587</span><span class="badge g">Em rota</span></div><div class="map component-map" style="margin-top:12px"><span class="pin" style="left:45%;top:48%">🛵</span><span class="line" style="left:20%;top:65%;width:55%;transform:rotate(-20deg)"></span></div></div>`,
+  'Passagens':`<div class="card"><h2>🎟️ Passagens</h2><div class="action-grid"><button class="action"><b>🚌 Pesquisar viagem</b><span class="muted">Compare opções.</span></button><button class="action"><b>💰 Melhores preços</b><span class="muted">Encontre ofertas disponíveis.</span></button></div></div>`,
+  'Histórico':`<div class="card"><h2>🧾 Histórico</h2><div class="list"><div class="row"><span>Entrega #4587</span><b>Concluída</b></div><div class="row"><span>Compra #8831</span><b>Concluída</b></div></div></div>`,
+  'Contratos':`<div class="card"><h2>📑 Contratos VIP</h2><div class="action-grid"><button class="action"><b>➕ Novo contrato</b><span class="muted">Contratar a plataforma.</span></button><button class="action"><b>📄 Propostas</b><span class="muted">Acompanhar negociações.</span></button></div></div>`,
+  'Crescimento':`<div class="grid"><div class="card col8"><h2>🚀 Central de Crescimento</h2><p>Meta mensal: <b>R$ 250.000</b></p><div class="progress"><i style="width:72%"></i></div><h2 class="greenText">72%</h2><div class="list"><div class="row"><span>Vendas</span><b>+18%</b></div><div class="row"><span>Contratos</span><b>+3</b></div><div class="row"><span>Entregas</span><b>+22%</b></div></div></div><div class="card ai col4"><strong>🤖 Oportunidades</strong><p>3 regiões de alta demanda encontradas.</p><button class="btn">Ver sugestões</button></div></div>`,
+  'IA Empresarial':`<div class="phone-preview"><div class="notch"></div><div style="text-align:center;font-size:34px">🤖</div><h2 style="text-align:center">ROTA IA</h2><p class="muted" style="text-align:center">Seu assistente empresarial</p><button class="pbtn">Ver minhas entregas</button><button class="pbtn">Mostrar oportunidades</button><button class="pbtn">Analisar vendas</button><button class="pbtn">Falar com suporte</button></div>`,
+  'Catálogo':`<div class="card"><h2>📚 Catálogo da empresa</h2><div class="action-grid"><button class="action"><b>➕ Adicionar item</b></button><button class="action"><b>✏️ Editar catálogo</b></button></div></div>`,
+  'Ofertas VIP':`<div class="card" style="border-color:#b98a25"><h2 class="goldText">👑 Ofertas VIP</h2><p>Benefícios, campanhas e condições comerciais do contrato.</p><div class="quick-grid"><div class="quick"><b>⭐ Prioridade</b><span class="muted">Atendimento e operação.</span></div><div class="quick"><b>🔥 Campanhas</b><span class="muted">Ações para vender mais.</span></div><div class="quick"><b>💎 Benefícios</b><span class="muted">Conforme o plano.</span></div></div></div>`,
+  'Equipe':`<div class="card"><h2>👥 Equipe e permissões</h2><div class="list"><div class="row"><span>Administrador da empresa</span><span class="badge g">Acesso total</span></div><div class="row"><span>Operação</span><span class="badge">Operacional</span></div><div class="row"><span>Financeiro</span><span class="badge">Financeiro</span></div></div></div>`,
+  'Relatórios':`<div class="card"><h2>📊 Relatórios</h2><div class="quick-grid"><div class="quick"><b>Vendas</b><span class="muted">+18%</span></div><div class="quick"><b>Entregas</b><span class="muted">+22%</span></div><div class="quick"><b>Contratos</b><span class="muted">12 ativos</span></div></div></div>`,
+  'Pedidos e Entregas':`<div class="card"><h2>📦 Operações da empresa</h2><div class="list"><div class="row"><span>48 entregas</span><span class="badge g">Em operação</span></div><div class="row"><span>8 pedidos</span><span class="badge o">Aguardando</span></div></div></div>`,
+  'Frota':`<div class="card"><h2>🚚 Frota</h2><div class="action-grid"><button class="action"><b>🚛 Veículos</b><span class="muted">Gerenciar veículos.</span></button><button class="action"><b>📄 Documentos</b><span class="muted">Validade e controle.</span></button></div></div>`,
+  'IA':`<div class="phone-preview"><div class="notch"></div><div style="text-align:center;font-size:34px">🤖</div><h2 style="text-align:center">ROTA IA</h2><p>Assistente da sua área.</p><button class="pbtn">Ver operações</button><button class="pbtn">Encontrar oportunidades</button><button class="pbtn">Falar com suporte</button></div>`,
+  'Minha rota':`<div class="card"><h2>🧭 Minha rota</h2><div class="map component-map"><span class="pin" style="left:35%;top:55%">🛵</span><span class="pin" style="left:70%;top:35%">📦</span><span class="line" style="left:35%;top:55%;width:40%;transform:rotate(-20deg)"></span></div></div>`,
+  'Minhas rotas':`<div class="card"><h2>🧭 Minhas rotas</h2><div class="list"><div class="row"><span>Rota da manhã</span><span class="badge g">Concluída</span></div><div class="row"><span>Rota da tarde</span><span class="badge o">3 entregas</span></div></div></div>`,
+  'Minhas viagens':`<div class="card"><h2>🛣️ Minhas viagens</h2><div class="list"><div class="row"><span>BA → SP<br><small>2.000 km</small></span><span class="badge o">Agendada</span></div></div></div>`,
+  'Veículo':`<div class="card"><h2>🚛 Meu veículo</h2><div class="list"><div class="row"><span>Tipo</span><b>Carreta</b></div><div class="row"><span>Categoria</span><b>Carga geral</b></div><div class="row"><span>Documentos</span><span class="badge g">Verificados</span></div></div></div>`,
+  'Financeiro':`<div class="grid"><div class="card col6"><div class="muted">Saldo disponível</div><div class="money">R$ 1.250,00</div><button class="btn green" style="margin-top:12px">Solicitar saque</button></div><div class="card col6"><h2>💰 Movimentações</h2><div class="list"><div class="row"><span>Comissão</span><b>+ R$ 18,50</b></div><div class="row"><span>Venda</span><b>+ R$ 127,90</b></div></div></div></div>`
+ };
+ if(generic[area]) return generic[area];
+ return `<div class="card"><h2>${area}</h2><p>Esta tela pertence somente ao componente <b>${role}</b>. Aqui entram os recursos específicos de <b>${area}</b>.</p><div class="action-grid"><button class="action"><b>⚡ Abrir função</b><span class="muted">Demonstração interativa.</span></button><button class="action"><b>🤖 Ajuda da IA</b><span class="muted">Orientação sobre esta tela.</span></button></div></div>`;
+}
+
+function render(role){
+ let title='',sub='',body='';
+ if(role==='Entregador'){
+ title='🛵 Área do Entregador'; sub='Sua área de trabalho, pedidos próximos e ganhos.';
+ body=`
+ ${nav(role,['Início','Entregas','Mapa','Minhas rotas','Financeiro','Feedback','Perfil'])}
+ <div class="grid">
+ <div class="card kpi col3"><div>📦 Entregas hoje</div><div class="n">5 / 8</div><div class="progress"><i style="width:62%"></i></div></div>
+ <div class="card kpi col3"><div>💰 Ganhos hoje</div><div class="n greenText">R$ 248,50</div><div class="muted">+ R$ 62,30 bônus</div></div>
+ <div class="card kpi col3"><div>📍 Área de trabalho</div><div class="n blueText">São Paulo</div><div class="muted">Raio configurado: 15 km</div></div>
+ <div class="card kpi col3"><div>⭐ Avaliação</div><div class="n goldText">4,9</div><div class="muted">287 avaliações</div></div>
+ <div class="card col8"><h2>🗺️ Pedidos na sua região</h2><div class="map"><span class="pin" style="left:22%;top:35%">🟢</span><span class="pin" style="left:63%;top:58%">🟠</span><span class="pin" style="left:78%;top:25%">🟢</span><span class="pin" style="left:45%;top:70%">🔵</span><span class="line" style="left:23%;top:39%;width:45%;transform:rotate(18deg)"></span></div></div>
+ <div class="side col4">
+  <div class="card ai"><strong>🤖 IA do ROTA</strong><p>Encontrei 3 pedidos próximos que combinam com sua área e sua rota.</p><button class="btn">Ver oportunidades</button></div>
+  <div class="card"><h3>Pedidos disponíveis</h3><div class="list">
+   <div class="row"><span>📦 2,3 km<br><small>Centro → Vila Nova</small></span><b>R$ 12,50</b></div>
+   <div class="row"><span>📦 4,7 km<br><small>Jardim Paulista → Centro</small></span><b>R$ 18,90</b></div>
+   <div class="row"><span>📦 6,2 km<br><small>Consolação → Centro</small></span><b>R$ 14,30</b></div>
+  </div></div>
+ </div>
+ <div class="card col6"><h3>🎯 Meta do dia</h3><p>5 de 8 entregas</p><div class="progress"><i style="width:62%"></i></div></div>
+ <div class="card col6"><h3>💳 Seus ganhos</h3><p class="n greenText">R$ 248,50</p><button class="btn gold">Ver extrato</button></div>
+ </div>`;
+ } else if(role==='Caminhoneiro'){
+ title='🚛 Área do Caminhoneiro'; sub='Cargas compatíveis aparecendo automaticamente no mapa do Brasil.';
+ body=`
+ ${nav(role,['Início','Mapa do Brasil','Cargas','Minhas viagens','Financeiro','Feedback','Veículo','Perfil'])}
+ <div class="grid">
+ <div class="card kpi col3"><div>📦 Cargas compatíveis</div><div class="n blueText">12</div><div class="muted">Atualizadas agora</div></div>
+ <div class="card kpi col3"><div>🛣️ Sua rota</div><div class="n">BA → SP</div><div class="muted">2.000 km</div></div>
+ <div class="card kpi col3"><div>💰 Fretes disponíveis</div><div class="n greenText">R$ 84.500</div><div class="muted">valor bruto</div></div>
+ <div class="card kpi col3"><div>🚚 Veículo</div><div class="n">Carreta</div><div class="muted">Carga geral</div></div>
+ <div class="card col8"><h2>🗺️ Mapa do Brasil — cargas disponíveis</h2><div class="map"><span class="pin" style="left:27%;top:55%">🟢</span><span class="pin" style="left:44%;top:45%">🟠</span><span class="pin" style="left:68%;top:32%">🔵</span><span class="pin" style="left:76%;top:52%">🟢</span><span class="line" style="left:28%;top:58%;width:52%;transform:rotate(-16deg)"></span></div></div>
+ <div class="card col4"><h3>📦 Cargas para você</h3><div class="list">
+  <div class="row"><span>BA → SP<br><small>10 toneladas</small></span><b>R$ 8.500</b></div>
+  <div class="row"><span>PR → BA<br><small>15 toneladas</small></span><b>R$ 12.000</b></div>
+  <div class="row"><span>GO → MG<br><small>8 toneladas</small></span><b>R$ 6.800</b></div>
+ </div><p class="muted">A taxa do ROTA aparece antes da confirmação.</p></div>
+ <div class="card col12"><h3>💰 Exemplo de composição do frete</h3><div class="row"><span>Frete bruto</span><b>R$ 5.000</b></div><div class="row"><span>Taxa ROTA (exemplo)</span><b class="goldText">5% • R$ 250</b></div><div class="row"><span>Valor líquido do transportador</span><b class="greenText">R$ 4.750</b></div></div>
+ </div>`;
+ } else if(role==='Vendedor / Loja'){
+ title='🏪 Área do Vendedor'; sub='Venda produtos, receba pedidos e conecte suas vendas ao ROTA.';
+ body=`
+ ${nav(role,['Início','Produtos','Pedidos','Ofertas','Vendas','Financeiro','Feedback','Entrega'])}
+ <div class="grid">
+ <div class="card kpi col3"><div>🛍️ Vendas hoje</div><div class="n greenText">R$ 4.850</div><div class="muted">+18% vs. ontem</div></div>
+ <div class="card kpi col3"><div>📦 Pedidos</div><div class="n blueText">37</div><div class="muted">8 aguardando envio</div></div>
+ <div class="card kpi col3"><div>🏷️ Ofertas</div><div class="n purpleText">6</div><div class="muted">ativas</div></div>
+ <div class="card kpi col3"><div>⭐ Loja</div><div class="n goldText">4,8</div><div class="muted">avaliação</div></div>
+ <div class="card col8"><h2>🛒 Produtos e ofertas</h2><div class="list">
+ <div class="row"><span>Produto destaque<br><small>Oferta ativa</small></span><b>R$ 89,90</b><button class="btn">Ver</button></div>
+ <div class="row"><span>Produto novo<br><small>Entrega pelo ROTA</small></span><b>R$ 129,90</b><button class="btn">Ver</button></div>
+ <div class="row"><span>Kit promocional<br><small>Alta procura</small></span><b>R$ 159,90</b><button class="btn">Ver</button></div>
+ </div></div>
+ <div class="card col4 ai"><strong>🤖 IA do ROTA</strong><p>Seu produto com maior procura pode ter mais visibilidade nesta região.</p><button class="btn green">Criar oferta</button></div>
+ </div>`;
+ } else if(role==='Empresa / VIP'){
+ title='👑 ROTA VIP — Área da Empresa'; sub='Mais vendas. Mais operações. Mais crescimento.';
+ body=`
+ ${nav(role,['Início','Vendas','Contratos','Pedidos e Entregas','Frota','Financeiro','Crescimento','IA Empresarial','Catálogo','Ofertas VIP','Equipe','Relatórios','Feedback'])}
+ <div class="grid">
+ <div class="card kpi col3"><div>💰 Vendas do mês</div><div class="n greenText">R$ 184.750</div><div class="muted">+18%</div></div>
+ <div class="card kpi col3"><div>📑 Contratos ativos</div><div class="n blueText">12</div><div class="muted">3 novos</div></div>
+ <div class="card kpi col3"><div>📦 Entregas</div><div class="n purpleText">48</div><div class="muted">+22%</div></div>
+ <div class="card kpi col3"><div>💎 Comissão ROTA</div><div class="n goldText">R$ 9.237</div><div class="muted">5% demonstrativo</div></div>
+ <div class="card col7"><h2>🚀 Crescimento da Empresa</h2><p>Meta mensal: <b>R$ 250.000</b></p><div class="progress"><i style="width:72%"></i></div><h2 class="greenText">72%</h2><div class="list"><div class="row"><span>Vendas</span><b>+18%</b></div><div class="row"><span>Contratos</span><b>+3</b></div><div class="row"><span>Entregas</span><b>+22%</b></div></div></div>
+ <div class="side col5">
+  <div class="card ai"><strong>🤖 IA Empresarial</strong><p>Sua empresa cresceu 14%. Encontrei 3 novas oportunidades em regiões de alta demanda.</p><button class="btn">Ver sugestões</button></div>
+  <div class="card"><h3>🎯 Metas e desafios</h3><p>Fechar 5 novos contratos</p><div class="progress"><i style="width:60%"></i></div><p class="muted">3 / 5</p></div>
+ </div>
+ <div class="card col8"><h2>🗺️ Mapa de Operações</h2><div class="map"><span class="pin" style="left:25%;top:52%">📍</span><span class="pin" style="left:45%;top:35%">📍</span><span class="pin" style="left:70%;top:58%">📍</span><span class="pin" style="left:82%;top:28%">📍</span></div></div>
+ <div class="card col4"><h3>⚡ Ações rápidas</h3><div class="list"><button class="btn">Criar oferta</button><button class="btn green">Enviar proposta</button><button class="btn gold">Novo contrato</button><button class="btn">Adicionar carga</button></div></div>
+ <div class="card col6"><h3>💳 Financeiro</h3><p>Vendas brutas: <b>R$ 184.750</b></p><p>Comissão ROTA: <b class="goldText">R$ 9.237</b></p><p>Valor líquido da empresa: <b class="greenText">R$ 175.513</b></p></div>
+ <div class="card col6"><h3>💎 Benefícios VIP</h3><p>✓ Prioridade operacional<br>✓ Mais visibilidade<br>✓ Suporte exclusivo<br>✓ Condições comerciais do contrato</p></div>
+ </div>`;
+ } else {
+ title='📦 Área do Cliente'; sub='Compre, peça entregas, acompanhe pedidos e encontre ofertas.';
+ body=`
+ ${nav(role,['Início','Comprar','Nova entrega','Rastrear','Passagens','Histórico','Feedback','Perfil'])}
+ <div class="grid">
+ <div class="card kpi col3"><div>📦 Pedidos</div><div class="n blueText">3</div><div class="muted">em andamento</div></div>
+ <div class="card kpi col3"><div>🛒 Ofertas</div><div class="n greenText">24</div><div class="muted">perto de você</div></div>
+ <div class="card kpi col3"><div>🎟️ Passagens</div><div class="n purpleText">12</div><div class="muted">opções encontradas</div></div>
+ <div class="card kpi col3"><div>📍 Entrega</div><div class="n goldText">18 min</div><div class="muted">estimativa</div></div>
+ <div class="card col8"><h2>🔎 Encontre o que precisa</h2><div class="list"><div class="row"><span>🛍️ Comprar produtos</span><button class="btn">Buscar</button></div><div class="row"><span>📦 Solicitar entrega</span><button class="btn green">Criar pedido</button></div><div class="row"><span>🎟️ Procurar passagem</span><button class="btn">Pesquisar</button></div></div></div>
+ <div class="card col4 ai"><strong>🤖 IA do ROTA</strong><p>Posso ajudar a encontrar ofertas, organizar uma entrega ou comparar opções.</p><button class="btn">Falar com a IA</button></div>
+ </div>`;
+ }
+ document.getElementById('dashboard').innerHTML=`<div class="hero"><h1>${title}</h1><p>${sub}</p><button class="btn gold" onclick="show('roles')">Trocar área</button></div>${body}`;
+}
+</script>
+</body>
+</html>
