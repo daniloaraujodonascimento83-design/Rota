@@ -1,0 +1,4 @@
+const fs=require('fs');const assert=require('assert');const src=fs.readFileSync('server.js','utf8');
+for(const required of ["/api/health","/api/auth/register","/api/auth/login","/api/deliveries/available","/api/deliveries/:id/accept","/api/deliveries/:id/status","/api/owner/dashboard","rota_audit_log","rota_notifications","PICKED_UP","IN_TRANSIT","DELIVERED"]){assert(src.includes(required),`missing: ${required}`)}
+assert(src.includes("for update"),'delivery locking missing');assert(src.includes("isCustomer"),'customer permission check missing');assert(src.includes("isDriver"),'driver permission check missing');assert(src.includes("authLimiter"),'auth rate limit missing');assert(src.includes("testOnly:true"),'test payment must be marked test-only');
+console.log('ROTA smoke checks: OK');
