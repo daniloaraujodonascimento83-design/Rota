@@ -8,13 +8,12 @@ permissions:
   contents: write
 
 jobs:
-  fix-home:
+  improve-home:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Make ROTA open directly on the app
+      - name: Apply simple ROTA home improvements
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -23,17 +22,15 @@ jobs:
           old = '<button id="rotaAuthOpen" style="padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,#087cff,#00cfff);color:#fff;font-weight:900;border:0">Entrar</button>'
           if old in s:
               s = s.replace(old, '')
+          if 'src="/core-ui.js"' not in s:
+              s = s.replace('</body>', '<script src="/core-ui.js"></script>\n</body>')
           p.write_text(s, encoding='utf-8')
           PY
-
       - name: Commit the UI change
         run: |
-          if git diff --quiet -- index.html; then
-            echo "No UI change needed"
-            exit 0
-          fi
+          if git diff --quiet -- index.html; then echo "No UI change needed"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "ROTA: open directly on app home [skip ci]"
+          git commit -m "ROTA: add core quick actions and home-first UI [skip ci]"
           git push
