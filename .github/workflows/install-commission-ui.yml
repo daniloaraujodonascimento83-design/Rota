@@ -1,0 +1,36 @@
+name: Install ROTA commission UI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'commission-ui.js'
+      - '.github/workflows/install-commission-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Inject commission UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<script src="commission-ui.js"></script>'
+          if marker not in s:
+              s=s.replace('</body>', marker+'\n</body>', 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit injection
+        run: |
+          git config user.name 'ROTA Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Add commission test UI [skip ci]'
+          git push
