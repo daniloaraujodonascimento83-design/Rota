@@ -1,0 +1,39 @@
+name: ROTA Home First
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-home:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make ROTA open directly on the app
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<button id="rotaAuthOpen" style="padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,#087cff,#00cfff);color:#fff;font-weight:900;border:0">Entrar</button>'
+          if old in s:
+              s = s.replace(old, '')
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit the UI change
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No UI change needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "ROTA: open directly on app home [skip ci]"
+          git push
