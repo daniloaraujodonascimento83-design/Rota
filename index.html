@@ -164,7 +164,7 @@ border:1px solid #19548d}.map:before{content:"MAPA DE OPERAÇÕES";position:abso
 </style>
 </head>
 <body><div class="app">
-<header class="top"><div><div class="logo"><b>R</b>OTA</div><div class="tag">Tudo em um só lugar.</div></div><div id="status" class="badge g">● Sistema online</div></header>
+<header class="top"><div><div class="logo"><b>R</b>OTA</div><div class="tag">Tudo em um só lugar.</div></div><button id="rotaAuthOpen" style="padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,#087cff,#00cfff);color:#fff;font-weight:900;border:0">Entrar</button><div id="status" class="badge g">● Sistema online</div></header>
 
 <section id="home" class="screen active home-screen-main">
   <div class="main-header">
@@ -451,6 +451,38 @@ function render(role){
  }
  document.getElementById('dashboard').innerHTML=`<div class="hero"><h1>${title}</h1><p>${sub}</p><button class="btn gold" onclick="show('roles')">Trocar área</button></div>${body}`;
 }
+</script>
+<!-- ROTA_AUTH_PATCH -->
+<style>
+#rotaAuthModal{position:fixed;inset:0;z-index:9999;display:none;place-items:center;padding:18px;background:rgba(1,7,18,.94)}
+#rotaAuthModal.open{display:grid}
+.rota-auth-card{width:min(440px,100%);padding:24px;border-radius:24px;background:linear-gradient(145deg,#082448,#041427);border:1px solid #1c5a91;box-shadow:0 20px 70px #000b;color:#fff}
+.rota-auth-card h2{margin:0 0 6px;font-size:28px}.rota-auth-card p{color:#9fb8d3}
+.rota-auth-card input,.rota-auth-card select{width:100%;padding:13px;margin:7px 0 12px;background:#06162d;border:1px solid #214d7c;border-radius:12px;color:#fff}
+.rota-auth-tabs{display:flex;gap:8px;margin:16px 0}.rota-auth-tabs button{flex:1;padding:11px;border-radius:12px;border:1px solid #24557f;background:#071a35;color:#fff;font-weight:800}.rota-auth-tabs .on{background:#087fd0}
+.rota-auth-card .go{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(135deg,#00b96b,#22e89b);font-weight:900;color:#062016}
+#rotaAuthError{min-height:20px;color:#ff9b9b;font-weight:700}.rota-auth-close{float:right;background:none;color:#9fb8d3;border:0;font-size:25px}
+</style>
+<div id="rotaAuthModal">
+  <div class="rota-auth-card">
+    <button class="rota-auth-close" id="rotaAuthClose">×</button>
+    <div class="logo"><b>R</b>OTA</div><div class="tag">Tudo em um só lugar.</div>
+    <h2 id="rotaAuthTitle">Entrar no ROTA</h2><p id="rotaAuthSub">Acesse sua conta com segurança.</p>
+    <div class="rota-auth-tabs"><button id="rotaTabLogin" class="on">Entrar</button><button id="rotaTabReg">Criar acesso</button></div>
+    <div id="rotaAuthError"></div>
+    <div id="rotaLoginBox"><label>E-mail</label><input id="rotaEmail" type="email" autocomplete="email" placeholder="seu@email.com"><label>Senha</label><input id="rotaPassword" type="password" autocomplete="current-password" placeholder="Sua senha"><button class="go" id="rotaLoginBtn">ENTRAR</button></div>
+    <div id="rotaRegBox" style="display:none"><label>Nome</label><input id="rotaName" autocomplete="name" placeholder="Seu nome completo"><label>E-mail</label><input id="rotaRegEmail" type="email" autocomplete="email" placeholder="seu@email.com"><label>Telefone</label><input id="rotaPhone" autocomplete="tel" placeholder="(00) 00000-0000"><label>Perfil</label><select id="rotaRole"><option>Cliente</option><option>Entregador</option><option>Vendedor / Loja</option><option>Caminhoneiro</option><option>Empresa / VIP</option></select><label>Senha</label><input id="rotaRegPassword" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres"><button class="go" id="rotaRegBtn">CRIAR ACESSO</button></div>
+  </div>
+</div>
+<script>
+(function(){
+  const modal=document.getElementById('rotaAuthModal'), err=document.getElementById('rotaAuthError');
+  const loginBox=document.getElementById('rotaLoginBox'), regBox=document.getElementById('rotaRegBox');
+  function open(mode){modal.classList.add('open');err.textContent='';const login=mode==='login';loginBox.style.display=login?'block':'none';regBox.style.display=login?'none':'block';document.getElementById('rotaAuthTitle').textContent=login?'Entrar no ROTA':'Criar acesso no ROTA';document.getElementById('rotaAuthSub').textContent=login?'Acesse sua conta com segurança.':'Crie seu acesso para entrar na sua área.';document.getElementById('rotaTabLogin').classList.toggle('on',login);document.getElementById('rotaTabReg').classList.toggle('on',!login)}
+  document.getElementById('rotaAuthOpen').onclick=()=>open('login');document.getElementById('rotaAuthClose').onclick=()=>modal.classList.remove('open');document.getElementById('rotaTabLogin').onclick=()=>open('login');document.getElementById('rotaTabReg').onclick=()=>open('register');
+  document.getElementById('rotaLoginBtn').onclick=async()=>{err.textContent='';try{const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('rotaEmail').value.trim(),password:document.getElementById('rotaPassword').value})});const d=await r.json();if(!r.ok)throw Error(d.error||'Não foi possível entrar.');localStorage.setItem('rota_token',d.token);modal.classList.remove('open');location.reload()}catch(e){err.textContent=e.message}};
+  document.getElementById('rotaRegBtn').onclick=async()=>{err.textContent='';const body={name:document.getElementById('rotaName').value.trim(),email:document.getElementById('rotaRegEmail').value.trim(),phone:document.getElementById('rotaPhone').value.trim(),role:document.getElementById('rotaRole').value,password:document.getElementById('rotaRegPassword').value};try{const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw Error(d.error||'Não foi possível criar o acesso.');localStorage.setItem('rota_token',d.token);modal.classList.remove('open');location.reload()}catch(e){err.textContent=e.message}};
+})();
 </script>
 </body>
 </html>
