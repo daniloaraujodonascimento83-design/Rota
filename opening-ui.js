@@ -1,6 +1,5 @@
 (()=>{ 
   const hasToken=()=>!!localStorage.getItem('rota_token');
-  if(hasToken()) return;
   const style=document.createElement('style');
   style.textContent=`
   #rotaOpening{position:fixed;inset:0;z-index:20000;overflow:auto;color:#fff;background:#020817;font-family:Inter,system-ui,Arial,sans-serif}
