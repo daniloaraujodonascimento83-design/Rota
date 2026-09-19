@@ -1,3 +1,4 @@
+// ROTA opening build 2026-09-16
 (()=>{ 
   const hasToken=()=>!!localStorage.getItem('rota_token');
   const style=document.createElement('style');
