@@ -4,12 +4,12 @@
   style.textContent=`
   #rotaOpening{position:fixed;inset:0;z-index:20000;overflow:auto;color:#fff;background:#010817;font-family:Inter,system-ui,Arial,sans-serif}
   #rotaOpening *{box-sizing:border-box}
-  .ro-bg{position:fixed;inset:0;background:
+  .ro-bg{position:fixed;inset:0;background-image:url("/rota-cover.jpg");background-size:cover;background-position:center top;background-repeat:no-repeat;
     radial-gradient(circle at 50% 18%,rgba(38,163,255,.34),transparent 28%),
     radial-gradient(circle at 18% 55%,rgba(0,120,255,.24),transparent 30%),
     radial-gradient(circle at 88% 58%,rgba(255,170,50,.20),transparent 27%),
     linear-gradient(180deg,#021a3e 0%,#063764 42%,#011022 100%)}
-  .ro-bg:before{content:"";position:absolute;inset:0;background:
+  .ro-bg:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,10,25,.05),rgba(0,8,20,.48) 62%,rgba(1,8,23,.88));
     linear-gradient(125deg,transparent 36%,rgba(46,176,255,.20) 37%,transparent 39%),
     linear-gradient(158deg,transparent 58%,rgba(255,182,65,.13) 59%,transparent 62%),
     linear-gradient(22deg,transparent 70%,rgba(18,129,255,.18) 71%,transparent 73%);
@@ -21,7 +21,7 @@
   .ro-city{position:absolute;left:0;right:0;bottom:0;height:24%;opacity:.7;background:
     linear-gradient(to top,rgba(0,0,0,.88),transparent),
     repeating-linear-gradient(90deg,transparent 0 34px,rgba(12,42,75,.9) 35px 52px,transparent 53px 78px)}
-  .ro-plane{position:absolute;right:7%;top:2%;font-size:clamp(62px,12vw,150px);transform:rotate(-8deg);filter:drop-shadow(0 18px 28px #000c);animation:roPlane 7s ease-in-out infinite}
+  .ro-plane,.ro-bike,.ro-truck,.ro-ship{display:none}.ro-plane{position:absolute;right:7%;top:2%;font-size:clamp(62px,12vw,150px);transform:rotate(-8deg);filter:drop-shadow(0 18px 28px #000c);animation:roPlane 7s ease-in-out infinite}
   .ro-bike{position:absolute;left:-2%;bottom:5%;font-size:clamp(105px,18vw,230px);transform:rotate(-8deg);filter:drop-shadow(0 25px 32px #000d);animation:roBike 5s ease-in-out infinite}
   .ro-truck{position:absolute;right:-2%;bottom:8%;font-size:clamp(95px,16vw,220px);filter:drop-shadow(0 24px 32px #000d);animation:roTruck 6s ease-in-out infinite}
   .ro-ship{position:absolute;right:8%;bottom:-2%;font-size:clamp(88px,15vw,200px);filter:drop-shadow(0 18px 28px #000c);animation:roShip 6s ease-in-out infinite}
