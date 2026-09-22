@@ -37,7 +37,7 @@
   document.body.appendChild(modal);
   const body=modal.querySelector('#rgBody');
 
-  let watchId=null, activeDelivery=null, map=null, marker=null, routeTimer=null, leafletLoaded=false;
+  let watchId=null, activeDelivery=null, map=null, marker=null, routeLine=null, routeTimer=null, leafletLoaded=false;
 
   function stopWatch(){
     if(watchId!==null && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
@@ -54,7 +54,7 @@
     });
   }
 
-  function setMap(lat,lng,accuracy){
+  function setMap(lat,lng,accuracy,history=[]){
     if(!window.L)return;
     if(!map){
       map=L.map('rgMap',{zoomControl:true}).setView([lat,lng],16);
@@ -64,6 +64,7 @@
       marker.setLatLng([lat,lng]);
       map.setView([lat,lng],Math.max(map.getZoom(),15));
     }
+    if(Array.isArray(history)&&history.length>1){const pts=history.slice().reverse().map(x=>[Number(x.latitude),Number(x.longitude)]);if(map._rotaRoute)map.removeLayer(map._rotaRoute);map._rotaRoute=L.polyline(pts,{color:'#00d9ff',weight:5,opacity:.78}).addTo(map)}
     if(accuracy){
       if(map._rotaAccuracy)map.removeLayer(map._rotaAccuracy);
       map._rotaAccuracy=L.circle([lat,lng],{radius:accuracy,color:'#00d9ff',fillColor:'#00d9ff',fillOpacity:.10,weight:1}).addTo(map);
@@ -115,7 +116,7 @@
     async function refresh(){
       try{
         const d=await api('/api/deliveries/'+id+'/location');
-        if(d.location){setMap(d.location.latitude,d.location.longitude,d.location.accuracy);document.getElementById('rgLive').innerHTML='<span class="rg-live">● GPS recebido</span> · '+new Date(d.location.recorded_at).toLocaleTimeString('pt-BR')+' · precisão ±'+Math.round(d.location.accuracy||0)+' m'}
+        if(d.location){setMap(d.location.latitude,d.location.longitude,d.location.accuracy,d.history||[]);document.getElementById('rgLive').innerHTML='<span class="rg-live">● GPS recebido</span> · '+new Date(d.location.recorded_at).toLocaleTimeString('pt-BR')+' · precisão ±'+Math.round(d.location.accuracy||0)+' m'}
         else document.getElementById('rgLive').textContent='Aguardando o entregador ativar o GPS.';
       }catch(e){document.getElementById('rgLive').textContent=e.message}
     }
