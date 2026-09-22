@@ -4,16 +4,8 @@
   style.textContent=`
   #rotaOpening{position:fixed;inset:0;z-index:20000;overflow:auto;color:#fff;background:#010817;font-family:Inter,system-ui,Arial,sans-serif}
   #rotaOpening *{box-sizing:border-box}
-  .ro-bg{position:fixed;inset:0;background-image:url("/rota-cover.jpg");background-size:cover;background-position:center top;background-repeat:no-repeat;
-    radial-gradient(circle at 50% 18%,rgba(38,163,255,.34),transparent 28%),
-    radial-gradient(circle at 18% 55%,rgba(0,120,255,.24),transparent 30%),
-    radial-gradient(circle at 88% 58%,rgba(255,170,50,.20),transparent 27%),
-    linear-gradient(180deg,#021a3e 0%,#063764 42%,#011022 100%)}
-  .ro-bg:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,10,25,.05),rgba(0,8,20,.48) 62%,rgba(1,8,23,.88));
-    linear-gradient(125deg,transparent 36%,rgba(46,176,255,.20) 37%,transparent 39%),
-    linear-gradient(158deg,transparent 58%,rgba(255,182,65,.13) 59%,transparent 62%),
-    linear-gradient(22deg,transparent 70%,rgba(18,129,255,.18) 71%,transparent 73%);
-    filter:blur(1px)}
+  .ro-bg{position:fixed;inset:0;background-color:#010817;background-image:url("/rota-cover.jpg");background-size:cover;background-position:center top;background-repeat:no-repeat}
+  .ro-bg:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,10,25,.05),rgba(0,8,20,.42) 62%,rgba(1,8,23,.86));filter:blur(1px)}
   .ro-stars{position:absolute;inset:0;background-image:radial-gradient(#fff9 1px,transparent 1px);background-size:82px 82px;opacity:.14}
   .ro-cover{position:relative;z-index:2;min-height:610px;height:54vh;min-height:560px;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding-top:42px}
   .ro-cover:after{content:"";position:absolute;left:0;right:0;bottom:0;height:35%;background:linear-gradient(transparent,#010817)}
